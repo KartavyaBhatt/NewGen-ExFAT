@@ -1,0 +1,24 @@
+Using TexFAT like copy of FAT table.
+
+Cluster Allocation in TexFAT is given in this research paper.
+https://www.researchgate.net/publication/291074776_Characterization_of_Transaction-Safe_Cluster_Allocation_Strategies_of_TexFAT_File_System_for_Embedded_Storage_Devices
+
+Detailed discription of exFAT.
+https://en.wikipedia.org/wiki/ExFAT
+
+Go to this link to see cluster size in exFAT.
+https://support.microsoft.com/en-us/help/140365/default-cluster-size-for-ntfs--fat--and-exfat
+
+This site will give list of some features to implement in project.
+https://social.technet.microsoft.com/wiki/contents/articles/5375.windows-file-systems.aspx#exFAT
+
+On this link there is info about file names in FAT.
+https://technet.microsoft.com/en-us/library/cc938438.aspx
+
+Limitations of FAT32.
+https://support.microsoft.com/en-us/help/184006/limitations-of-fat32-file-system
+
+To initialize OEM parameters in exFAT.
+https://technet.microsoft.com/fr-fr/ee490605
+
+
