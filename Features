@@ -21,4 +21,5 @@ https://support.microsoft.com/en-us/help/184006/limitations-of-fat32-file-system
 To initialize OEM parameters in exFAT.
 https://technet.microsoft.com/fr-fr/ee490605
 
-
+Reference Github repository for coding
+https://github.com/relan/exfat
