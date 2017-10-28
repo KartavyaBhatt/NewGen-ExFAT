@@ -1,10 +1,8 @@
-#ifndef PARTITION_H 
-#define PARTITION_H
-
-#include "utils.c"
+#ifndef FILESYSTEM_H
+#define FILESYSTEM_H
 
 #define SECTOR_SIZE 512
-#define CLUSTER_SIZE (SIZE >= 7340032 && SIZE <= 268435456 ? 4096 : (SIZE > 268435456 && SIZE <= 34359720776 ? 32768 : (SIZE > 34359720776 && SIZE <= 281475070097329 ? 131072 : 0)))
 
-
+static int NGEF_init(const char *partition_name, long long int size);
+static int mount_NGFS()
 #endif

@@ -1,10 +1,44 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "partition.h"
-#include "utils.c"
+#include "fileSystem.h"
 
-void main_boot_region_init()
+static const long long int volumeSize;
+static const int culsterSize;
+static FILE *volume;
+
+static int NGEF_init(const char *partition_name, long long int size)
+{
+		volume = fopen(partition_name, "w");
+
+		if (volume == NULL)
+			return 0;
+
+		fclose(volume);
+
+		volume = fopen(partition_name, "a+");
+
+		ftruncate(fileno(volume), size);
+		
+		volumeSize = size;
+
+		culsterSize = (volumeSize >= 7340032 && volumeSize <= 268435456 ? 4096 : (volumeSize > 268435456 && volumeSize <= 34359720776 ? 32768 : (volumeSize > 34359720776 && volumeSize <= 281475070097329 ? 131072 : 0)));
+
+		return 1;
+}
+
+static int mount_NGFS()
+{
+
+	main_boot_region_init();
+	backup_boot_region_init();
+	fat1_init();
+	fat2_init();
+
+	return 1;
+}
+
+static void main_boot_region_init()
 {
 	//Boot Sector
 	char jumpBoot[3];
@@ -57,10 +91,13 @@ void main_boot_region_init()
 	char buffer[12*SECTOR_SIZE];
 	snprintf(buffer, sizeof(buffer), "%s%s%s%s", mainBootSector, extendedBootSector, OEMParameters, reservedSector, vbrHash);
 
-	fwrite(buffer, 1, sizeof(buffer), volume);
+	for (int i = 0; buffer[i] != NULL; i++)
+	{
+		putc(buffer[i], volume);
+	}
 }
 
-void backup_boot_region_init()
+static void backup_boot_region_init()
 {
 	//Boot Sector
 	char jumpBoot[3];
@@ -113,5 +150,18 @@ void backup_boot_region_init()
 	char buffer[12*SECTOR_SIZE];
 	snprintf(buffer, sizeof(buffer), "%s%s%s%s", mainBootSector, extendedBootSector, OEMParameters, reservedSector, vbrHash);
 
-	fwrite(buffer, 1, sizeof(buffer), volume);
+	for (int i = 0; buffer[i] != NULL; i++)
+	{
+		putc(buffer[i], volume);
+	}
+}
+
+static void fat1_init()
+{
+
+}
+
+static void fat2_init()
+{
+
 }
