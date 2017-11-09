@@ -26,12 +26,15 @@ static bool NGEF_init(const char *partition_name, long long int size)
 			return false;
 		}
 
+		else
+			printf("Hello\n");
+
 		fclose(volume);
 
 		volume = fopen(partition_name, "a+");
 
-		ftruncate(fileno(volume), size);
-		memset(buff, '\0', size);
+		//ftruncate(fileno(volume), size);
+		//memset(buff, '\0', size);
 
 		volumeSize = size;
 
@@ -42,22 +45,28 @@ static bool NGEF_init(const char *partition_name, long long int size)
 		}
 		
 		else
+		{
 			culsterSize = (volumeSize >= 7340032 && volumeSize <= 268435456 ? 4096 : (volumeSize > 268435456 && volumeSize <= 34359720776 ? 32768 : (volumeSize > 34359720776 && volumeSize <= 281475070097329 ? 131072 : 0)));
+		}
 
 		printf("Partition created");
 
 		return true;
 }
 
-static bool mount_NGFS()
+static bool mount_NGEF()
 {
-	main_boot_region_init();
-	backup_boot_region_init();
-	fat1_init();
-	fat2_init();
+	if(main_boot_region_init() && backup_boot_region_init()&& fat1_init()&& fat2_init())
+	{
+		printf("NewGen ExFAT is sucessfully mounted on the partition !");
+		return true;
+	}
 
-	printf("NewGen ExFAT is sucessfully mounted on the partition !");
-	return true;
+	else
+	{
+		printf("Some error occured. Unable to mount file system.\n");
+		return false;
+	}
 }
 
 static bool main_boot_region_init()
@@ -88,12 +97,20 @@ static bool fat1_init()
 	fseek(volume, FATOFFSET,0);
 	fwrite(&FatTable, sizeof(FatTable), 1, volume);
 
-	return true;
+	if (fwrite)
+		return true;
+
+	else
+		return false;
 }
 
 static bool fat2_init()
 {
 	fseek(volume, FATOFFSET+FATLEGTH, 0);
 	fwrite(&TFatTable, sizeof(TFatTable), 1, volume);
-	return true;
+	if (fwrite)
+		return true;
+
+	else
+		return false;
 }
