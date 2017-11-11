@@ -5,6 +5,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include "partition.h"
+#include "fs.c"
 
 static long long int volumeSize;
 static int culsterSize;
@@ -13,6 +14,7 @@ static mainBootRegion MainBootRegion;
 static backupBootRegion BackupBootRegion;
 static fatTable FatTable;
 static tFatTable TFatTable;
+static clusterHeap ClusterHeap;
 
 static bool NGEF_init(const char *partition_name, long long int size)
 {
@@ -56,9 +58,9 @@ static bool NGEF_init(const char *partition_name, long long int size)
 
 static bool mount_NGEF()
 {
-	if(main_boot_region_init() && backup_boot_region_init()&& fat1_init()&& fat2_init())
+	if(main_boot_region_init() && backup_boot_region_init() && fat1_init() && fat2_init() && clusterHeap_init())
 	{
-		printf("NewGen ExFAT is sucessfully mounted on the partition !");
+		printf("NewGen ExFAT is sucessfully mounted on the partition !\n");
 		return true;
 	}
 
@@ -113,4 +115,35 @@ static bool fat2_init()
 
 	else
 		return false;
+}
+
+static bool clusterHeap_init()
+{
+	fseek(volume, MainBootRegion.clusterHeapOffset, 0);
+	fwrite(&ClusterHeap, sizeof(ClusterHeap), 1, volume);
+
+	if (fwrite)
+		return true;
+
+	else
+		return false;
+}
+
+long int get_cluster_count()
+{
+	return CLUSTERCOUNT;
+}
+
+long int get_fatoffset()
+{
+	return FATOFFSET;
+}
+long int get_fatlength()
+{
+	return FATLEGTH;
+}
+
+int get_clusterSize()
+{
+	return culsterSize;
 }

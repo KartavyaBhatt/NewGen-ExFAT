@@ -1,5 +1,5 @@
 #include <inttypes.h>
-#include "partition.c"
+#include "partition.h"
 
 typedef struct allocationBMapEntry
 {
@@ -27,7 +27,7 @@ typedef struct volumeLabelEntry
 	uint8_t charCount;
 	char volumeLabel[22];
 	uint8_t reserved;
-}volumeLabel;
+}volumeLabelEntry;
 
 typedef struct fileDirectoryEntry
 {
@@ -61,12 +61,12 @@ typedef struct streamExtensionEntry
 }streamExtensionEntry;
 
 
-typedef struct fileNameEntry;
+typedef struct fileNameEntry
 {
 	uint8_t EntryType;
 	uint8_t generalScondaryFlags;
 	uint8_t fileName[30];
-};
+}fileNameEntry;
 
 typedef struct rootDirectory
 {
@@ -76,7 +76,7 @@ typedef struct rootDirectory
 	fileDirectoryEntry FileDirectoryEntry;
 	streamExtensionEntry StreamExtensionEntry;
 	fileNameEntry FileNameEntry;
-	texfatPaddingEntry TexfatPaddingEntry;
+	//texfatPaddingEntry TexfatPaddingEntry;
 
 }rootDirectory;
 
@@ -85,12 +85,12 @@ typedef struct bitMapTable
 	uint8_t bitMap[4588];
 }bitMapTable;
 
-typedef struct cluster
+typedef struct clusterNode
 {
-	char data[culsterSize];	
-};
+	char data[CLUSTERSIZE];	
+}clusterNode;
 
 typedef struct clusterHeap
 {
-	cluster Cluster[CLUSTERCOUNT];
-};
+	clusterNode Cluster[CLUSTERCOUNT];
+}clusterHeap;

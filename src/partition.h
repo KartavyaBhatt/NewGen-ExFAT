@@ -2,11 +2,13 @@
 #define FILESYSTEM_H
 
 #include <inttypes.h>
+#include <stdbool.h>
 
 #define SECTOR_SIZE 512
 #define CLUSTERCOUNT 36700
 #define FATOFFSET 65*SECTOR_SIZE
 #define FATLEGTH 256*SECTOR_SIZE
+#define CLUSTERSIZE 4096
 
 static bool NGEF_init(const char *partition_name, long long int size);
 static bool mount_NGEF();
@@ -14,6 +16,11 @@ static bool fat2_init();
 static bool fat1_init();
 static bool main_boot_region_init();
 static bool backup_boot_region_init();
+static bool clusterHeap_init();
+long int get_cluster_count();
+long int get_fatoffset();
+long int get_fatlength();
+int get_clusterSize();
 
 typedef struct mainBootRegion 
 {
