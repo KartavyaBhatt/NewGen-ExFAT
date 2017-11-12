@@ -8,7 +8,7 @@
 #define CLUSTERCOUNT 36700
 #define FATOFFSET 65*SECTOR_SIZE
 #define FATLEGTH 256*SECTOR_SIZE
-#define CLUSTERSIZE 4096
+#define CLUSTERSIZE 32768
 
 static bool NGEF_init(const char *partition_name, long long int size);
 static bool mount_NGEF();
@@ -17,10 +17,7 @@ static bool fat1_init();
 static bool main_boot_region_init();
 static bool backup_boot_region_init();
 static bool clusterHeap_init();
-long int get_cluster_count();
-long int get_fatoffset();
-long int get_fatlength();
-int get_clusterSize();
+static FILE* get_volume();
 
 typedef struct mainBootRegion 
 {
@@ -60,6 +57,8 @@ typedef struct mainBootRegion
 	//VBR Hash
 	uint8_t vbrHash[SECTOR_SIZE];
 } mainBootRegion;
+
+static mainBootRegion get_mainBootRegion();	
 
 typedef struct backupBootRegion
 {
@@ -110,5 +109,10 @@ typedef struct tFatTable
 {
 	uint32_t fatEntry[CLUSTERCOUNT];
 }tFatTable;
+
+typedef struct cluster
+{
+	char data[CLUSTERSIZE];	
+}cluster;
 
 #endif

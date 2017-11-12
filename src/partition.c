@@ -5,7 +5,6 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include "partition.h"
-#include "fs.c"
 
 static long long int volumeSize;
 static int culsterSize;
@@ -14,44 +13,45 @@ static mainBootRegion MainBootRegion;
 static backupBootRegion BackupBootRegion;
 static fatTable FatTable;
 static tFatTable TFatTable;
-static clusterHeap ClusterHeap;
+static cluster Cluster[CLUSTERCOUNT];
 
 static bool NGEF_init(const char *partition_name, long long int size)
 {
 		char buff[size];
-		printf("Creating partition...");
-		volume = fopen(partition_name, "w");
+
+		printf("Opening partition...\n");
+		volume = fopen(partition_name, "r+");
 
 		if (volume == NULL)
 		{
-			printf("Partition not created due to some error. Please try again...\n");
-			return false;
-		}
+			printf("Partition not present. Creating a new partition...\n");
+			volume = fopen(partition_name, "w+");
 
-		else
-			printf("Hello\n");
+			if (volume == NULL)
+			{
+				return false;
+			}
+		
 
-		fclose(volume);
+			ftruncate(fileno(volume), size);
 
-		volume = fopen(partition_name, "a+");
+			volumeSize = size;
 
-		//ftruncate(fileno(volume), size);
-		//memset(buff, '\0', size);
+			if(volumeSize < 7340032 || volumeSize > 281475070097329)
+			{
+				perror("Volume Size not supported :( rolling back the changes...\n");
+				return false;
+			}
+			
+			else
+			{
+				culsterSize = (volumeSize >= 7340032 && volumeSize <= 268435456 ? 4096 : (volumeSize > 268435456 && volumeSize <= 34359720776 ? 32768 : (volumeSize > 34359720776 && volumeSize <= 281475070097329 ? 131072 : 0)));
+			}
 
-		volumeSize = size;
-
-		if(volumeSize < 7340032 || volumeSize > 281475070097329)
-		{
-			perror("Volume Size not supported :( rolling back the changes...");
-			return false;
+			mount_NGEF();
 		}
 		
-		else
-		{
-			culsterSize = (volumeSize >= 7340032 && volumeSize <= 268435456 ? 4096 : (volumeSize > 268435456 && volumeSize <= 34359720776 ? 32768 : (volumeSize > 34359720776 && volumeSize <= 281475070097329 ? 131072 : 0)));
-		}
-
-		printf("Partition created");
+		printf("Partition established !\n");
 
 		return true;
 }
@@ -73,20 +73,42 @@ static bool mount_NGEF()
 
 static bool main_boot_region_init()
 {
-	fwrite(&MainBootRegion, sizeof(mainBootRegion), 1, volume);
+	// Debug :: long int z;
+	MainBootRegion.clusterHeapOffset = 580;
+	MainBootRegion.fatOffset = 65;
+	MainBootRegion.fatLength = 256;
+	MainBootRegion.rootDirectoryFirstCluster = 2;
+	MainBootRegion.bytesPerSector = 9;
+	MainBootRegion.clusterCount = 36700;
 
-	if (fwrite)
+	fseek(volume, 0, 0);
+	// Debug :: z = ftell(volume);
+	// Debug :: printf("MainBootRegion : %ld\n", z);
+
+	if (fwrite(&MainBootRegion, sizeof(mainBootRegion), 1, volume) == 1)
+	{
 		return true;
+	}
 	else
 		return false;
 }
 
 static bool backup_boot_region_init()
 {
-	fseek(volume, FATLEGTH, 0);
-	fwrite(&BackupBootRegion, sizeof(backupBootRegion), 1, volume);
+	// Debug :: long int z;
 
-	if (fwrite)
+	BackupBootRegion.clusterHeapOffset = 580;
+	BackupBootRegion.fatOffset = 65;
+	BackupBootRegion.fatLength = 256;
+	BackupBootRegion.rootDirectoryFirstCluster = 2;
+	BackupBootRegion.bytesPerSector = 9;
+	BackupBootRegion.clusterCount = 36700;
+
+	fseek(volume, sizeof(MainBootRegion)*SECTOR_SIZE, 0);
+	// Debug :: z = ftell(volume);
+	// Debug :: printf("BackupBootRegion : %ld\n", z);
+
+	if (fwrite(&BackupBootRegion, sizeof(backupBootRegion), 1, volume) == 1)
 		return true;
 	else
 		return false;
@@ -96,10 +118,13 @@ static bool backup_boot_region_init()
 
 static bool fat1_init()
 {
-	fseek(volume, FATOFFSET,0);
-	fwrite(&FatTable, sizeof(FatTable), 1, volume);
+	// Debug :: long int z;
 
-	if (fwrite)
+	fseek(volume, MainBootRegion.fatOffset*SECTOR_SIZE,0);
+	// Debug :: z = ftell(volume);
+	// Debug :: printf("FatTable : %ld\n", z);
+
+	if (fwrite(&FatTable, sizeof(FatTable), 1, volume) == 1)
 		return true;
 
 	else
@@ -108,9 +133,13 @@ static bool fat1_init()
 
 static bool fat2_init()
 {
-	fseek(volume, FATOFFSET+FATLEGTH, 0);
-	fwrite(&TFatTable, sizeof(TFatTable), 1, volume);
-	if (fwrite)
+	// Debug :: long int z;
+
+	fseek(volume, (MainBootRegion.fatOffset+MainBootRegion.fatLength)*SECTOR_SIZE, 0);
+	// Debug :: z = ftell(volume);
+	// Debug :: printf("TFatTable: %ld\n", z);
+	
+	if (fwrite(&TFatTable, sizeof(TFatTable), 1, volume) == 1)
 		return true;
 
 	else
@@ -119,31 +148,30 @@ static bool fat2_init()
 
 static bool clusterHeap_init()
 {
-	fseek(volume, MainBootRegion.clusterHeapOffset, 0);
-	fwrite(&ClusterHeap, sizeof(ClusterHeap), 1, volume);
+	// Debug :: long int z;
 
-	if (fwrite)
-		return true;
+	fseek(volume, MainBootRegion.clusterHeapOffset*SECTOR_SIZE, 0);
+	// Debug :: z = ftell(volume);
+	// Debug :: printf("ClusterHeap : %ld\n", z);
 
-	else
-		return false;
+
+	for (int i = 0; i < MainBootRegion.clusterCount; ++i)
+	{
+		if (fwrite(&Cluster[i], sizeof(Cluster[i]), 1, volume) != 1)
+			return false;	
+	}
+
+	// Debug :: z = ftell(volume);
+	// Debug :: printf("ClusterHeap End: %ld\n", z);
+	return true;
 }
 
-long int get_cluster_count()
+static FILE* get_volume()
 {
-	return CLUSTERCOUNT;
+	return volume;
 }
 
-long int get_fatoffset()
+static mainBootRegion get_mainBootRegion()
 {
-	return FATOFFSET;
-}
-long int get_fatlength()
-{
-	return FATLEGTH;
-}
-
-int get_clusterSize()
-{
-	return culsterSize;
+	return MainBootRegion;
 }

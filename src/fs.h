@@ -1,3 +1,6 @@
+#ifndef FS_H
+#define FS_H
+
 #include <inttypes.h>
 #include "partition.h"
 
@@ -85,12 +88,4 @@ typedef struct bitMapTable
 	uint8_t bitMap[4588];
 }bitMapTable;
 
-typedef struct clusterNode
-{
-	char data[CLUSTERSIZE];	
-}clusterNode;
-
-typedef struct clusterHeap
-{
-	clusterNode Cluster[CLUSTERCOUNT];
-}clusterHeap;
+#endif
