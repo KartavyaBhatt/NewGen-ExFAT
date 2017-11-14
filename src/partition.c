@@ -77,7 +77,7 @@ static bool main_boot_region_init()
 	MainBootRegion.clusterHeapOffset = 580;
 	MainBootRegion.fatOffset = 65;
 	MainBootRegion.fatLength = 256;
-	MainBootRegion.rootDirectoryFirstCluster = 2;
+	MainBootRegion.rootDirectoryFirstCluster = 5;
 	MainBootRegion.bytesPerSector = 9;
 	MainBootRegion.clusterCount = 36700;
 
@@ -124,6 +124,14 @@ static bool fat1_init()
 	// Debug :: z = ftell(volume);
 	// Debug :: printf("FatTable : %ld\n", z);
 
+	FatTable.fatEntry[0] = 4294967288;				//Assign 0xFFFFFFF8 to cluster 0 as Media type
+	FatTable.fatEntry[1] = 4294967295;				//Assign 0xFFFFFFFF to cluster 1 
+
+	for (int i = 2; i < MainBootRegion.clusterCount; ++i)
+	{
+		FatTable.fatEntry[i] = 0;
+	}
+
 	if (fwrite(&FatTable, sizeof(FatTable), 1, volume) == 1)
 		return true;
 
@@ -139,6 +147,14 @@ static bool fat2_init()
 	// Debug :: z = ftell(volume);
 	// Debug :: printf("TFatTable: %ld\n", z);
 	
+	TFatTable.fatEntry[0] = 4294967288;			//Assign 0xFFFFFFF8 to cluster 0 as Media type
+	TFatTable.fatEntry[1] = 4294967295;			//Assign 0xFFFFFFFF to cluster 1 
+
+	for (int i = 2; i < MainBootRegion.clusterCount; ++i)
+	{
+		TFatTable.fatEntry[i] = 0;
+	}
+
 	if (fwrite(&TFatTable, sizeof(TFatTable), 1, volume) == 1)
 		return true;
 
@@ -165,6 +181,7 @@ static bool clusterHeap_init()
 	// Debug :: printf("ClusterHeap End: %ld\n", z);
 	return true;
 }
+
 
 static FILE* get_volume()
 {
