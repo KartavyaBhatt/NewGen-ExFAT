@@ -4,7 +4,7 @@
 #include "fs.h"
 #include "conversion.c"
 
-bool write_cluster(char *data, long int clusterNumber)
+bool write_cluster(uint8_t *data, long int clusterNumber)
 {
 	mainBootRegion MainBootRegion = get_mainBootRegion();
 	
@@ -14,7 +14,13 @@ bool write_cluster(char *data, long int clusterNumber)
 		cluster Cluster;
 		
 
-		strcpy(Cluster.data,data);
+		for (int i = 0; i < CLUSTERSIZE; i++)
+			Cluster.data[i] = data[i];
+
+		for (int i = 0; i < CLUSTERSIZE; ++i)
+		{
+			printf("Write Buff Data : %" PRIu8 "\n", Cluster.data[i]);
+		}
 
 		// Debug :: printf("Data : %s\n", data);
 		// Debug :: printf("Cluster data : %s\n", Cluster.data);
@@ -31,7 +37,7 @@ bool write_cluster(char *data, long int clusterNumber)
 		return false;
 }
 
-bool read_cluster(char *buff, long int clusterNumber)
+bool read_cluster(uint8_t *buff, long int clusterNumber)
 {
 	mainBootRegion MainBootRegion = get_mainBootRegion();
 	
@@ -45,7 +51,10 @@ bool read_cluster(char *buff, long int clusterNumber)
 		if(fread(&Cluster, sizeof(Cluster), 1, volume) == 1)
 		{
 			// Debug :: printf("Read Cluster Data : %s\n", Cluster.data);
-			strcpy(buff, Cluster.data);
+			for (int i = 0; i < CLUSTERSIZE; ++i)
+			{
+				buff[i] = Cluster.data[i];
+			}
 			// Debug :: printf("Read Buff Data : %s\n", buff);
 			return true;
 		}

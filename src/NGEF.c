@@ -5,9 +5,9 @@
 
 void main()
 {
-	char buff1[CLUSTERSIZE];
-	char buff[CLUSTERSIZE];
-	char str[32];
+	uint8_t buff1[CLUSTERSIZE];
+	uint8_t buff[32];
+	uint8_t str[32];
 	
 	NGEF_init("FS", 7340032);                //Creating partiton of 1GB = 1073741824 bytes
 
@@ -16,10 +16,10 @@ void main()
 
 	AllocationBMapEntry1.EntryType = 0x81;
 	AllocationBMapEntry1.bitmapFlags = 0x04;
-	AllocationBMapEntry1.firstCluster = 12365;
-	AllocationBMapEntry1.dataLength = 987456;
+	AllocationBMapEntry1.firstCluster = 0x02;
+	AllocationBMapEntry1.dataLength = 0x02;
 
-	ctc_allocationBMapEntry(AllocationBMapEntry1, str);
+	cti_allocationBMapEntry(AllocationBMapEntry1, str);
 
 	if(write_cluster(str, 3))
 	{
@@ -27,7 +27,6 @@ void main()
 
 		if (buff)
 		{
-			// printf("Reading cluster 3 : %s\n", buff);
 			AllocationBMapEntry2 = cts_allocationBMapEntry(buff);
 			printf("EntryType : %" PRIu8 "\n", AllocationBMapEntry2.EntryType);
 			printf("bitmapFlags : %" PRIu8 "\n", AllocationBMapEntry2.bitmapFlags);

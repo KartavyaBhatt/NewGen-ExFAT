@@ -112,7 +112,7 @@ typedef struct tFatTable
 
 typedef struct cluster
 {
-	char data[CLUSTERSIZE];	
+	uint8_t data[CLUSTERSIZE];	
 }cluster;
 
 #endif

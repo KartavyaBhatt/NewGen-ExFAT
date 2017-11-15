@@ -2,13 +2,13 @@
 #include <inttypes.h>
 #include <string.h>
 
+/*
 void convert_to_char8(uint8_t z, unsigned char * const ser)
 {
 	ser[0] = z;
 }
 
 uint8_t convert_to_int8(unsigned char * const ser)
-
 {
 	uint8_t z = 0;
 
@@ -39,6 +39,8 @@ void convert_to_char32(uint32_t z, unsigned char * const ser)
 	ser[1] = z >> 16;
 	ser[2] = z >> 8;
 	ser[3] = z;
+
+	printf("32 ki string : %d\n", ser[3]);
 }
 
 uint32_t convert_to_int32(unsigned char * const ser)
@@ -50,6 +52,8 @@ uint32_t convert_to_int32(unsigned char * const ser)
 	z = (z << 8) | ser[2];
 	z = (z << 8) | ser[3];
 	
+	printf("Z : %" PRIu32 "\n", z);
+
 	return z;
 }
 
@@ -80,143 +84,146 @@ uint64_t convert_to_int64(unsigned char * const ser)
 
 	return z;
 }
+*/
 
-void ctc_allocationBMapEntry(allocationBMapEntry AllocationBMapEntry, unsigned char * const str)
+union convert16{
+	uint32_t x;
+	uint8_t y[2];
+}convert16;
+
+union convert32{
+	uint32_t x;
+	uint8_t y[4];
+}convert32;
+
+union convert64{
+	uint64_t x;
+	uint8_t y[8];
+}convert64;
+
+
+void cti_allocationBMapEntry(allocationBMapEntry AllocationBMapEntry, uint8_t * str)
 {
-	char tmp8;
-	char tmp32[4];
-	char tmp64[8];
+	uint8_t tmp8;
 
-	convert_to_char8(AllocationBMapEntry.EntryType, &tmp8);
-	strcat(str, &tmp8);
+	str[0] = AllocationBMapEntry.EntryType;
 	
-	convert_to_char8(AllocationBMapEntry.bitmapFlags, &tmp8);
-	strcat(str, &tmp8);
+	str[1] = AllocationBMapEntry.bitmapFlags;
 
 	for (int i = 0; i < 18; i++)
 		str[i+2] = 0;
 
-	convert_to_char32(AllocationBMapEntry.firstCluster, tmp32);	
+	convert32.x = AllocationBMapEntry.firstCluster;	
 	
 	for (int i = 0; i < 4; i++)
-		str[20+i] = tmp32[0+i];
+		str[20+i] = convert32.y[0+i];
 	
-	convert_to_char64(AllocationBMapEntry.dataLength, tmp64);
+	convert64.x = AllocationBMapEntry.dataLength;
 	for (int i = 0; i < 8; i++)
-		str[24+i] = tmp64[0+i];
+		str[24+i] = convert64.y[0+i];
+
+	for (int i = 0; i < 8; ++i)
+	{
+		printf("String : %" PRIu8 "\n", str[i+24]);
+	}
 }
 
-allocationBMapEntry cts_allocationBMapEntry(unsigned char * const str)
+allocationBMapEntry cts_allocationBMapEntry(uint8_t * str)
 {
 	allocationBMapEntry AllocationBMapEntry;
-	char tmp8;
-	char tmp32[4];
-	char tmp64[8];
 
-	strncpy(&tmp8, str + 0, 1);
-	AllocationBMapEntry.EntryType = convert_to_int8(&tmp8);
+	AllocationBMapEntry.EntryType = str[0];
 
-	strncpy(&tmp8, str + 1, 1);
-	AllocationBMapEntry.bitmapFlags = convert_to_int8(&tmp8);	
+	AllocationBMapEntry.bitmapFlags =str[1] ;
+
+	for (int i = 0; i < 18; ++i)
+	{
+		AllocationBMapEntry.reserved[i] = str[2+i];
+	}
 
 	for (int i = 0; i < 4; i++)
-	 	tmp32[0+i] = str[20+i];
+	 	convert32.y[0+i] = str[20+i];
 	
-	AllocationBMapEntry.firstCluster = convert_to_int32(tmp32);
+	AllocationBMapEntry.firstCluster = convert32.x;
 
 	for (int i = 0; i < 8; i++)
-		tmp64[0+i] = str[24+i];
+		convert64.y[0+i] = str[24+i];
 	
-	AllocationBMapEntry.dataLength = convert_to_int64(tmp64);
+	AllocationBMapEntry.dataLength = convert64.x;
 
 	return AllocationBMapEntry;
 }
 
-void ctc_upCaseTableDirectoryEntry(upCaseTableDirectoryEntry UpCaseTableDirectoryEntry, unsigned char * const str)
+void cti_upCaseTableDirectoryEntry(upCaseTableDirectoryEntry UpCaseTableDirectoryEntry, uint8_t * str)
 {
-	char tmp8;
-	char tmp32[4];
-	char tmp64[8];
+	 str[0] = UpCaseTableDirectoryEntry.EntryType;
 
-	convert_to_char8(UpCaseTableDirectoryEntry.EntryType, &tmp8);
-	strcat(str, &tmp8);
-	
 	for (int i = 0; i < 3; i++)
 		str[i+2] = 0;
 
-	convert_to_char32(UpCaseTableDirectoryEntry.tableChecksum, tmp32);
+	convert32.x = UpCaseTableDirectoryEntry.tableChecksum;
 	
 	for (int i = 0; i < 4; i++)
-		str[4+i] = tmp32[0+i];
+		str[4+i] = convert32.y[0+i];
 
 	for (int i = 0; i < 12; ++i)
 		str[8+i] = 0;
 
-	convert_to_char32(UpCaseTableDirectoryEntry.firstCluster, tmp32);
+	convert32.x = UpCaseTableDirectoryEntry.firstCluster;
 	
 	for (int i = 0; i < 4; i++)
-		str[20+i] = tmp32[0+i];
-
+		str[20+i] = convert32.y[0+i];
 	
-	convert_to_char64(UpCaseTableDirectoryEntry.dataLength, tmp64);
+	convert64.x = UpCaseTableDirectoryEntry.dataLength;
 	for (int i = 0; i < 8; i++)
-		str[24+i] = tmp64[0+i];
+		str[24+i] = convert64.y[0+i];
 }
 
-upCaseTableDirectoryEntry cts_upCaseTableDirectoryEntry (unsigned char * const str)
+upCaseTableDirectoryEntry cts_upCaseTableDirectoryEntry (uint8_t * str)
 {
 	upCaseTableDirectoryEntry UpCaseTableDirectoryEntry;
-	char tmp8;
-	char tmp32[4];
-	char tmp64[8];
 
-	strncpy(&tmp8, str + 0, 1);
-	UpCaseTableDirectoryEntry.EntryType = convert_to_int8(&tmp8);
+	UpCaseTableDirectoryEntry.EntryType = str[0];
 
 	for (int i = 0; i < 4; i++)
-	 	tmp32[0+i] = str[4+i];
+	 	convert32.y[0+i] = str[4+i];
 	
-	UpCaseTableDirectoryEntry.tableChecksum = convert_to_int32(tmp32);
+	UpCaseTableDirectoryEntry.tableChecksum = convert32.x;
 
 	for (int i = 0; i < 4; i++)
-	 	tmp32[0+i] = str[20+i];
+	 	convert32.y[0+i] = str[20+i];
 	
-	UpCaseTableDirectoryEntry.firstCluster = convert_to_int32(tmp32);
+	UpCaseTableDirectoryEntry.firstCluster = convert32.x;
 
 
 	for (int i = 0; i < 8; i++)
-		tmp64[0+i] = str[24+i];
+		convert64.y[0+i] = str[24+i];
 	
-	UpCaseTableDirectoryEntry.dataLength = convert_to_int64(tmp64);
+	UpCaseTableDirectoryEntry.dataLength = convert64.x;
 
 	return UpCaseTableDirectoryEntry;
 }
 
 
-void ctc_volumeLabelEntry(volumeLabelEntry VolumeLabelEntry, unsigned char * const str)
+void cti_volumeLabelEntry(volumeLabelEntry VolumeLabelEntry, uint8_t * str)
 {
 	char tmp8;
 
-	convert_to_char8(VolumeLabelEntry.EntryType, &tmp8);
-	strcat(str, &tmp8);
+	str[0] = VolumeLabelEntry.EntryType;
 	
-	convert_to_char32(VolumeLabelEntry.charCount, &tmp8);
-	strcat(str, &tmp8);
-	
+	str[1] = VolumeLabelEntry.charCount;
+
 	for (int i = 0; i < 22; ++i)
 		str[2+i] = VolumeLabelEntry.volumeLabel[i];
 }
 
-volumeLabelEntry cts_volumeLabelEntry (unsigned char * const str)
+volumeLabelEntry cts_volumeLabelEntry (uint8_t * str)
 {
 	volumeLabelEntry VolumeLabelEntry;
-	char tmp8;
 
-	strncpy(&tmp8, str + 0, 1);
-	VolumeLabelEntry.EntryType = convert_to_int8(&tmp8);
+	VolumeLabelEntry.EntryType = str[0];
 
-	strncpy(&tmp8, str + 1, 1);
-	VolumeLabelEntry.charCount = convert_to_int8(&tmp8);
+	VolumeLabelEntry.charCount = str[1];
 
 	for (int i = 0; i < 22; i++)
 	 	VolumeLabelEntry.volumeLabel[0+i] = str[2+i];
@@ -225,56 +232,50 @@ volumeLabelEntry cts_volumeLabelEntry (unsigned char * const str)
 }
 
 
-void ctc_fileDirectoryEntry(fileDirectoryEntry FileDirectoryEntry, unsigned char * const str)
+void cti_fileDirectoryEntry(fileDirectoryEntry FileDirectoryEntry, uint8_t * str)
 {
-	char tmp8;
-	char tmp16[2];
-	char tmp32[4];
-
-	convert_to_char8(FileDirectoryEntry.EntryType, &tmp8);
-	strcat(str, &tmp8);
+	str[0] = FileDirectoryEntry.EntryType;
 	
-	convert_to_char8(FileDirectoryEntry.secondaryCount, &tmp8);
-	strcat(str, &tmp8);
+	str[1] = FileDirectoryEntry.secondaryCount;
 	
-	convert_to_char16(FileDirectoryEntry.setChecksum, tmp16);
+	convert16.x = FileDirectoryEntry.setChecksum;
 	for (int i = 0; i < 2; ++i)
-		str[2+i] = tmp16[i];
+		str[2+i] = convert16.y[i];
 
-	convert_to_char16(FileDirectoryEntry.fileAttribute, tmp16);
+	convert16.x = FileDirectoryEntry.fileAttribute;
 	for (int i = 0; i < 2; ++i)
-		str[4+i] = tmp16[i];
+		str[4+i] = convert16.y[i];
 
 	for (int i = 0; i < 2; ++i)
 		str[6+i] = 0;
 
-	convert_to_char32(FileDirectoryEntry.createTimestamp, tmp32);
+	convert32.x = FileDirectoryEntry.createTimestamp;
 	for (int i = 0; i < 4; ++i)
-		str[8+i] = tmp32[i];
+		str[8+i] = convert32.y[i];
 
-	convert_to_char32(FileDirectoryEntry.lastModifiedTimestamp, tmp32);
+	convert32.x FileDirectoryEntry.lastModifiedTimestamp[i];;
 	for (int i = 0; i < 4; ++i)
-		str[12+i] = tmp32[i];
+		str[12+i] = convert32.y[i];
 
-	convert_to_char32(FileDirectoryEntry.lastAccessedTimestamp, tmp32);
+	convert32.x = FileDirectoryEntry.lastAccessedTimestamp;
 	for (int i = 0; i < 4; ++i)
-		str[16+i] = tmp32[i];
+		str[16+i] = convert32.y[i];
 
-	convert_to_char32(FileDirectoryEntry.create10msIncreament, &str[20]);
+	str[20] = FileDirectoryEntry.create10msIncreament;
 
-	convert_to_char8(FileDirectoryEntry.lastModified10msIncreament, &str[21]);
+	str[21] = FileDirectoryEntry.lastModified10msIncreament;
 
-	convert_to_char8(FileDirectoryEntry.createTZoffset, &str[22]);
+	str[22] = FileDirectoryEntry.createTZoffset;
 
-	convert_to_char8(FileDirectoryEntry.lastModifiedTZoffset, &str[23]);
+	str[23] = FileDirectoryEntry.lastModifiedTZoffset;
 
-	convert_to_char8(FileDirectoryEntry.lastAccessedTZoffset, &str[24]);
+	str[24] = FileDirectoryEntry.lastAccessedTZoffset;
 
 	for (int i = 0; i < 7; ++i)
 		str[25+i] = 0;
 }
 
-fileDirectoryEntry cts_fileDirectoryEntry (unsigned char * const str)
+fileDirectoryEntry cts_fileDirectoryEntry (uint8_t * str)
 {
 	fileDirectoryEntry FileDirectoryEntry;
 	char tmp8;
@@ -327,107 +328,89 @@ fileDirectoryEntry cts_fileDirectoryEntry (unsigned char * const str)
 
 
 
-void ctc_streamExtensionEntry(streamExtensionEntry StreamExtensionEntry, unsigned char * const str)
+void cti_streamExtensionEntry(streamExtensionEntry StreamExtensionEntry, uint8_t * str)
 {
-	char tmp8;
-	char tmp16[2];
-	char tmp32[4];
-	char tmp64[8];
-
-	convert_to_char8(StreamExtensionEntry.EntryType, &tmp8);
-	strcat(str, &tmp8);
+	str[0] = StreamExtensionEntry.EntryType;
 	
-	convert_to_char8(StreamExtensionEntry.generalSecondaryFlags, &tmp8);
-	strcat(str, &tmp8);
+	str[1] = StreamExtensionEntry.generalSecondaryFlags;
 	
 	str[2] = 0;
 
-	convert_to_char8(StreamExtensionEntry.nameLength, &tmp8);
-	str[3] = tmp8;
+	str[3] = StreamExtensionEntry.nameLength;
 
-	convert_to_char16(StreamExtensionEntry.nameHash, tmp16);
+	convert16.x = StreamExtensionEntry.nameHash;
 	for (int i = 0; i < 2; ++i)
-		str[4+i] = tmp16[i];
+		str[4+i] = convert16.y[i];
 
 	for (int i = 0; i < 2; ++i)
 		str[6+i] = 0;
 
-	convert_to_char64(StreamExtensionEntry.vaildDataLength, tmp64);
+	convert64.x = StreamExtensionEntry.vaildDataLength;
 	for (int i = 0; i < 8; ++i)
-		str[8+i] = tmp32[i];
+		str[8+i] = convert64.y[i];
 
 	for (int i = 0; i < 4; ++i)
 		str[16+i] = 0;
 
-	convert_to_char32(StreamExtensionEntry.firstCluster, tmp32);
+	convert32.x = StreamExtensionEntry.firstCluster;
 	for (int i = 0; i < 4; ++i)
-		str[20+i] = tmp32[i];
+		str[20+i] = convert32.y[i];
 
-	convert_to_char64(StreamExtensionEntry.dataLength, tmp64);
+	convert64.x = StreamExtensionEntry.dataLength;
 	for (int i = 0; i < 8; ++i)
-		str[24+i] = tmp32[i];
+		str[24+i] = convert64.y[i];
 }
 
-streamExtensionEntry cts_streamExtensionEntry (unsigned char * const str)
+streamExtensionEntry cts_streamExtensionEntry (uint8_t * str)
 {
 	streamExtensionEntry StreamExtensionEntry;
-	char tmp8;
-	char tmp16[2];
-	char tmp32[4];
-	char tmp64[8];
 
-	strncpy(&tmp8, str + 0, 1);
-	StreamExtensionEntry.EntryType = convert_to_int8(&tmp8);
+	StreamExtensionEntry.EntryType = str[0];
 
-	strncpy(&tmp8, str + 1, 1);
-	StreamExtensionEntry.generalSecondaryFlags = convert_to_int8(&tmp8);
+	StreamExtensionEntry.generalSecondaryFlags = str[1];
 
-	StreamExtensionEntry.nameLength = convert_to_int8(&str[3]);
+	StreamExtensionEntry.nameLength = str[3];
 
 	for (int i = 0; i < 2; i++)
-	 	tmp16[0+i] = str[4+i];
+	 	convert16.y[0+i] = str[4+i];
 
-	StreamExtensionEntry.nameHash = convert_to_int16(tmp16);	
+	StreamExtensionEntry.nameHash = convert16.x;	
 
 	for (int i = 0; i < 8; i++)
-	 	tmp64[0+i] = str[8+i];
+	 	convert64.y[0+i] = str[8+i];
 
-	StreamExtensionEntry.vaildDataLength = convert_to_int64(tmp64);
+	StreamExtensionEntry.vaildDataLength = convert64.x;
 
 	for (int i = 0; i < 4; i++)
-	 	tmp32[0+i] = str[20+i];
+	 	convert32.y[0+i] = str[20+i];
 
-	StreamExtensionEntry.firstCluster = convert_to_int32(tmp32);
+	StreamExtensionEntry.firstCluster = convert32.x;
 
 	for (int i = 0; i < 8; i++)
-	 	tmp64[0+i] = str[24+i];
+	 	convert64.y[0+i] = str[24+i];
 
-	StreamExtensionEntry.dataLength = convert_to_int64(tmp64);	
+	StreamExtensionEntry.dataLength = convert64.x;	
 
 	return StreamExtensionEntry;
 }
 
 
-void ctc_fileNameEntry(fileNameEntry FileNameEntry, unsigned char * const str)
+void cti_fileNameEntry(fileNameEntry FileNameEntry, uint8_t * str)
 {
-	char tmp8;
+	str[0] = FileNameEntry.EntryType;
 
-	convert_to_char8(FileNameEntry.EntryType, &tmp8);
-	str[0] = tmp8;
-
-	convert_to_char8(FileNameEntry.generalSecondaryFlags, &tmp8);
-	str[1] = tmp8;
+	str[1] = FileNameEntry.generalSecondaryFlags;
 
 	for (int i = 0; i < 30; i++)
 		str[2+i] = FileNameEntry.fileName[i];
 }
 
-fileNameEntry cts_fileNameEntry(unsigned char * const str)
+fileNameEntry cts_fileNameEntry(uint8_t * str)
 {
 	fileNameEntry FileNameEntry;
 
-	FileNameEntry.EntryType = convert_to_int8(&str[0]);
-	FileNameEntry.generalSecondaryFlags = convert_to_int8(&str[1]);
+	FileNameEntry.EntryType = str[0];
+	FileNameEntry.generalSecondaryFlags = str[1];
 
 	for (int i = 0; i < 30; i++)
 		FileNameEntry.fileName[i] = str[2+i];
