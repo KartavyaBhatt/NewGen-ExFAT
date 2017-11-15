@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include <string.h>
-#include "conversion.h"
 
 void convert_to_char8(uint8_t z, unsigned char * const ser)
 {

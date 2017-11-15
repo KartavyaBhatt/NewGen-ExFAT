@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include "partition.c"
+#include "partition.h"
 #include "fs.h"
 #include "conversion.c"
 
