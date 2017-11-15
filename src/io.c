@@ -17,11 +17,6 @@ bool write_cluster(uint8_t *data, long int clusterNumber)
 		for (int i = 0; i < CLUSTERSIZE; i++)
 			Cluster.data[i] = data[i];
 
-		for (int i = 0; i < CLUSTERSIZE; ++i)
-		{
-			printf("Write Buff Data : %" PRIu8 "\n", Cluster.data[i]);
-		}
-
 		// Debug :: printf("Data : %s\n", data);
 		// Debug :: printf("Cluster data : %s\n", Cluster.data);
 
@@ -94,6 +89,8 @@ static bool rootDir_init()
 	upCaseTableDirectoryEntry UpCaseTableDirectoryEntry;
 	volumeLabelEntry VolumeLabelEntry;
 
+	uint8_t str[CLUSTERSIZE];
+	uint8_t arr[32];
 
 	AllocationBMapEntry1.EntryType = 0x81;
 	AllocationBMapEntry1.bitmapFlags = 0x00;
@@ -112,7 +109,27 @@ static bool rootDir_init()
 	VolumeLabelEntry.EntryType = 0x83;
 	VolumeLabelEntry.volumeLabel[0] = 'N';
 
-	fseek(volume, (MainBootRegion.clusterHeapOffset*SECTOR_SIZE)+(MainBootRegion.rootDirectoryFirstCluster*CLUSTERSIZE), 0);
+	cti_allocationBMapEntry(AllocationBMapEntry1, arr);
+	for (int i = 0; i < 32; ++i)
+		str[i] = arr[i];
 
-	// fwrite()
+	cti_allocationBMapEntry(AllocationBMapEntry2, arr);
+	for (int i = 0; i < 32; ++i)
+		str[32+i] = arr[i];
+
+	cti_upCaseTableDirectoryEntry(UpCaseTableDirectoryEntry, arr);
+	for (int i = 0; i < 32; ++i)
+		str[64+i] = arr[i];
+
+	cti_volumeLabelEntry(VolumeLabelEntry, arr);
+	for (int i = 0; i < 32; ++i)
+		str[96+i] = arr[i];
+
+	if(write_cluster(str, MainBootRegion.rootDirectoryFirstCluster))
+		return true;
+
+	else
+		return false;
+	
 }
+

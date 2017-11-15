@@ -13,6 +13,9 @@ static mainBootRegion MainBootRegion;
 static backupBootRegion BackupBootRegion;
 static fatTable FatTable;
 static tFatTable TFatTable;
+static bitMapTable BitMapTable1;
+static bitMapTable BitMapTable2;
+static upCaseTable UpCaseTable;
 static cluster Cluster[CLUSTERCOUNT];
 
 static bool NGEF_init(const char *partition_name, long long int size)
@@ -177,11 +180,54 @@ static bool clusterHeap_init()
 			return false;	
 	}
 
+	if(!rootDir_init())
+		return false;
+
+
+
 	// Debug :: z = ftell(volume);
 	// Debug :: printf("ClusterHeap End: %ld\n", z);
 	return true;
 }
 
+static bool bitMapTable_init()
+{
+	uint8_t str[CLUSTERSIZE];
+
+	for (int i = 0; i < 4588; ++i)
+		BitMapTable1.bitMap[i] = 0x00;
+
+	for (int i = 0; i < 4588; ++i)
+		str[i] = BitMapTable1.bitMap[i];
+
+	if(write_cluster(str, 2) == false)
+		return false;
+
+	for (int i = 0; i < 4588; ++i)
+		BitMapTable2.bitMap[i] = 0x00;
+
+	for (int i = 0; i < 4588; ++i)
+		str[i] = BitMapTable2.bitMap[i];
+
+	if(write_cluster(str, 3) == false)
+		return false;	
+
+	return true;
+}
+
+static bool upCaseTable_init()
+{
+	uint8_t str[CLUSTERSIZE];
+
+	for (int i = 0; i < 128; ++i)
+		UpCaseTable.upCaseEntry[i] = 0x00;
+
+	for (int i = 0; i < 128; ++i)
+		str[i] = UpCaseTable.upCaseEntry[i];
+
+	if(write_cluster(str, 4) == false)
+		return false;
+}
 
 static FILE* get_volume()
 {
