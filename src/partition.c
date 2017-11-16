@@ -20,8 +20,6 @@ static cluster Cluster[CLUSTERCOUNT];
 
 static bool NGEF_init(const char *partition_name, long long int size)
 {
-		char buff[size];
-
 		printf("Opening partition...\n");
 		volume = fopen(partition_name, "r+");
 
@@ -54,9 +52,15 @@ static bool NGEF_init(const char *partition_name, long long int size)
 			mount_NGEF();
 		}
 		
-		printf("Partition established !\n");
+		else
+		{
+			bitMapTable1_ret();
+			bitMapTable2_ret();
+			printf("Partition established !\n");
 
-		return true;
+			return true;	
+		}
+		
 }
 
 static bool mount_NGEF()
@@ -165,6 +169,26 @@ static bool fat2_init()
 		return false;
 }
 
+static void fat1_ret()
+{
+	fseek(volume, MainBootRegion.fatOffset*SECTOR_SIZE,0);
+
+	for (int i = 0; i < CLUSTERCOUNT; ++i)
+	{
+		fread(FatTable.fatEntry[i], sizeof(uint32_t), volume);
+	}
+}
+
+static void fat2_ret()
+{
+	fseek(volume, (MainBootRegion.fatOffset+MainBootRegion.fatLength)*SECTOR_SIZE,0);
+
+	for (int i = 0; i < CLUSTERCOUNT; ++i)
+	{
+		fread(TFatTable.fatEntry[i], sizeof(uint32_t), volume);
+	}
+}
+
 static bool clusterHeap_init()
 {
 	// Debug :: long int z;
@@ -215,6 +239,26 @@ static bool bitMapTable_init()
 	return true;
 }
 
+static void bitMapTable1_ret()
+{
+	fseek(volume, (MainBootRegion.clusterHeapOffset*SECTOR_SIZE) + (2*CLUSTERSIZE), 0);
+
+	for (int i = 0; i < CLUSTERCOUNT; ++i)
+	{
+		fread(&BitMapTable1.bitMap[i], sizeof(uint8_t), volume);
+	}
+} 
+
+static void bitMapTable2_ret()
+{
+	fseek(volume, (MainBootRegion.clusterHeapOffset*SECTOR_SIZE) + (3*CLUSTERSIZE), 0);
+
+	for (int i = 0; i < CLUSTERCOUNT; ++i)
+	{
+		fread(&BitMapTable2.bitMap[i], sizeof(uint8_t), volume);
+	}
+}
+
 static bool upCaseTable_init()
 {
 	uint8_t str[CLUSTERSIZE];
@@ -237,4 +281,24 @@ static FILE* get_volume()
 static mainBootRegion get_mainBootRegion()
 {
 	return MainBootRegion;
+}
+
+static bitMapTable get_bitmapTable1()
+{
+	return BitMapTable1;
+}
+
+static bitMapTable get_bitmapTable2()
+{
+	return BitMapTable2;
+}
+
+static void set_bitMapTable1(bitMapTable BitMapTable)
+{
+	BitMapTable1 = BitMapTable;
+}
+
+static void set_bitMapTable2(bitMapTable BitMapTable)
+{
+	BitMapTable2 = BitMapTable;
 }
