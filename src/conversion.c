@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include <string.h>
+#include "fs.h"
 
 union convert16{
 	uint32_t x;
@@ -20,8 +21,6 @@ union convert64{
 
 void cti_allocationBMapEntry(allocationBMapEntry AllocationBMapEntry, uint8_t * str)
 {
-	uint8_t tmp8;
-
 	str[0] = AllocationBMapEntry.EntryType;
 	
 	str[1] = AllocationBMapEntry.bitmapFlags;
@@ -37,11 +36,6 @@ void cti_allocationBMapEntry(allocationBMapEntry AllocationBMapEntry, uint8_t * 
 	convert64.x = AllocationBMapEntry.dataLength;
 	for (int i = 0; i < 8; i++)
 		str[24+i] = convert64.y[0+i];
-
-	for (int i = 0; i < 8; ++i)
-	{
-		printf("String : %" PRIu8 "\n", str[i+24]);
-	}
 }
 
 allocationBMapEntry cts_allocationBMapEntry(uint8_t * str)
@@ -169,7 +163,7 @@ void cti_fileDirectoryEntry(fileDirectoryEntry FileDirectoryEntry, uint8_t * str
 	for (int i = 0; i < 4; ++i)
 		str[8+i] = convert32.y[i];
 
-	convert32.x FileDirectoryEntry.lastModifiedTimestamp[i];;
+	convert32.x = FileDirectoryEntry.lastModifiedTimestamp;
 	for (int i = 0; i < 4; ++i)
 		str[12+i] = convert32.y[i];
 
@@ -198,46 +192,44 @@ fileDirectoryEntry cts_fileDirectoryEntry (uint8_t * str)
 	char tmp16[2];
 	char tmp32[4];
 
-	strncpy(&tmp8, str + 0, 1);
-	FileDirectoryEntry.EntryType = convert_to_int8(&tmp8);
+	FileDirectoryEntry.EntryType = str[0];
 
-	strncpy(&tmp8, str + 1, 1);
-	FileDirectoryEntry.secondaryCount = convert_to_int8(&tmp8);
+	FileDirectoryEntry.secondaryCount = str[1];
 
 	for (int i = 0; i < 2; i++)
-	 	tmp16[0+i] = str[2+i];
+	 	convert16.y[0+i] = str[2+i];
 
-	FileDirectoryEntry.setChecksum = convert_to_int16(tmp16);
+	FileDirectoryEntry.setChecksum = convert16.x;
 
 	for (int i = 0; i < 2; i++)
-	 	tmp16[0+i] = str[4+i];
+	 	convert16.y[0+i] = str[4+i];
 
-	FileDirectoryEntry.fileAttribute = convert_to_int16(tmp16);	
-
-	for (int i = 0; i < 4; i++)
-	 	tmp32[0+i] = str[8+i];
-
-	FileDirectoryEntry.createTimestamp = convert_to_int32(tmp32);
+	FileDirectoryEntry.fileAttribute = convert16.x;	
 
 	for (int i = 0; i < 4; i++)
-	 	tmp32[0+i] = str[12+i];
+	 	convert32.y[0+i] = str[8+i];
 
-	FileDirectoryEntry.lastModifiedTimestamp = convert_to_int32(tmp32);
+	FileDirectoryEntry.createTimestamp = convert32.x;
 
 	for (int i = 0; i < 4; i++)
-	 	tmp32[0+i] = str[16+i];
+	 	convert32.y[0+i] = str[12+i];
 
-	FileDirectoryEntry.lastAccessedTimestamp = convert_to_int32(tmp32);	
+	FileDirectoryEntry.lastModifiedTimestamp = convert32.x;
 
-	FileDirectoryEntry.create10msIncreament = convert_to_int8(&str[20]);
+	for (int i = 0; i < 4; i++)
+	 	convert32.y[0+i] = str[16+i];
 
-	FileDirectoryEntry.lastModified10msIncreament = convert_to_int8(&str[21]);
+	FileDirectoryEntry.lastAccessedTimestamp = convert32.x;	
 
-	FileDirectoryEntry.createTZoffset = convert_to_int8(&str[22]);
+	FileDirectoryEntry.create10msIncreament = str[20];
 
-	FileDirectoryEntry.lastModifiedTZoffset = convert_to_int8(&str[23]);
+	FileDirectoryEntry.lastModified10msIncreament = str[21];
 
-	FileDirectoryEntry.lastAccessedTZoffset = convert_to_int8(&str[24]);
+	FileDirectoryEntry.createTZoffset = str[22];
+
+	FileDirectoryEntry.lastModifiedTZoffset = str[23];
+
+	FileDirectoryEntry.lastAccessedTZoffset = str[24];
 
 	return FileDirectoryEntry;
 }

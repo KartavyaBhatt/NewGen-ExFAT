@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <inttypes.h>
 #include <stdbool.h>
-#include "partition.h"
+#include "io.c"
 
 static long long int volumeSize;
 static int culsterSize;
@@ -175,7 +175,7 @@ static void fat1_ret()
 
 	for (int i = 0; i < CLUSTERCOUNT; ++i)
 	{
-		fread(FatTable.fatEntry[i], sizeof(uint32_t), volume);
+		fread(&FatTable.fatEntry[i], sizeof(uint32_t), 1, volume);
 	}
 }
 
@@ -185,7 +185,7 @@ static void fat2_ret()
 
 	for (int i = 0; i < CLUSTERCOUNT; ++i)
 	{
-		fread(TFatTable.fatEntry[i], sizeof(uint32_t), volume);
+		fread(&TFatTable.fatEntry[i], sizeof(uint32_t), 1, volume);
 	}
 }
 
@@ -245,7 +245,7 @@ static void bitMapTable1_ret()
 
 	for (int i = 0; i < CLUSTERCOUNT; ++i)
 	{
-		fread(&BitMapTable1.bitMap[i], sizeof(uint8_t), volume);
+		fread(&BitMapTable1.bitMap[i], sizeof(uint8_t), 1, volume);
 	}
 } 
 
@@ -255,7 +255,7 @@ static void bitMapTable2_ret()
 
 	for (int i = 0; i < CLUSTERCOUNT; ++i)
 	{
-		fread(&BitMapTable2.bitMap[i], sizeof(uint8_t), volume);
+		fread(&BitMapTable2.bitMap[i], sizeof(uint8_t), 1, volume);
 	}
 }
 

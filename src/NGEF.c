@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <unistd.h>
 #include "partition.c"
-#include "io.c"
+//#include "io.c"
+#include "fs_io.c"
 
 void main()
 {

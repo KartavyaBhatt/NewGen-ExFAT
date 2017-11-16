@@ -2,7 +2,6 @@
 #define FS_H
 
 #include <inttypes.h>
-#include "partition.h"
 
 typedef struct allocationBMapEntry
 {
@@ -71,15 +70,5 @@ typedef struct fileNameEntry
 	uint8_t generalSecondaryFlags;
 	char fileName[30];
 }fileNameEntry;
-
-typedef struct bitMapTable
-{
-	uint8_t bitMap[4588];
-}bitMapTable;
-
-typedef struct upCaseTable
-{
-	uint16_t upCaseEntry[128];
-}upCaseTable;
 
 #endif

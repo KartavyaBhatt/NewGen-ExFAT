@@ -3,6 +3,8 @@
 
 #include <inttypes.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include "io.h"
 
 #define SECTOR_SIZE 512
 #define CLUSTERCOUNT 36700
@@ -18,6 +20,12 @@ static bool main_boot_region_init();
 static bool backup_boot_region_init();
 static bool clusterHeap_init();
 static FILE* get_volume();
+static void fat1_ret();
+static void fat2_ret();
+static bool bitMapTable_init();
+static void bitMapTable1_ret();
+static void bitMapTable2_ret();
+static bool upCaseTable_init();
 
 typedef struct mainBootRegion 
 {
@@ -114,5 +122,21 @@ typedef struct cluster
 {
 	uint8_t data[CLUSTERSIZE];	
 }cluster;
+
+typedef struct bitMapTable
+{
+	uint8_t bitMap[4588];
+}bitMapTable;
+
+typedef struct upCaseTable
+{
+	uint16_t upCaseEntry[128];
+}upCaseTable;
+
+static bitMapTable get_bitmapTable1();
+static bitMapTable get_bitmapTable2();
+static void set_bitMapTable1(bitMapTable BitMapTable);
+static void set_bitMapTable2(bitMapTable BitMapTable);
+
 
 #endif
