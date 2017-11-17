@@ -20,6 +20,10 @@ static cluster Cluster[CLUSTERCOUNT];
 
 static bool NGEF_init(const char *partition_name, long long int size)
 {
+
+		printf("-------------------------------------------------------------\n");
+		printf("			NewGen-ExFAT	   					 \n");
+		printf("\n\n\n");		
 		printf("Opening partition...\n");
 		volume = fopen(partition_name, "r+");
 
@@ -55,11 +59,13 @@ static bool NGEF_init(const char *partition_name, long long int size)
 		else
 		{
 			bitMapTable1_ret();
-			bitMapTable2_ret();
-			printf("Partition established !\n");
-
-			return true;	
+			bitMapTable2_ret();	
 		}
+
+		printf("Partition established !\n");
+		printf("\n\n\n");
+		printf("-------------------------------------------------------------\n");
+		return true;
 		
 }
 

@@ -29,8 +29,13 @@ void main()
 	// }
 
 	char *path = "/";
-	char filename[30] = {'a', 'b', 'c'};
+	char filename[30];
 	
+	
+	printf("Enter file name : ");
+	scanf("%s", filename);
+	fflush(stdin);
+	printf("Enter file data : ");
 	scanf("%s", data);
 
 	// uint64_t pl = strlen(path);
@@ -39,11 +44,15 @@ void main()
 	// printf("%" PRIu64 "\n", pl);
 	// printf("%" PRIu64 "\n", dl);
 	
-	printf("Data in Main : %s\n", data);
-
 	if(create_file(filename, data))
-	 	printf("Created FIle in root.\n");
+	 	printf("Created File in root.\n\n");
 
-	 read_file(filename, buff1);
-	 printf("Data : \n%s", buff1);
+	fflush(stdin);
+
+	printf("Enter filename to read : ");
+	// scanf("%s", filename);
+	scanf("%s", filename);
+
+	read_cluster(buff1, 6);
+	printf("%s", buff1);
 }
