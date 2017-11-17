@@ -65,7 +65,7 @@ static bool NGEF_init(const char *partition_name, long long int size)
 
 static bool mount_NGEF()
 {
-	if(main_boot_region_init() && backup_boot_region_init() && fat1_init() && fat2_init() && clusterHeap_init())
+	if(main_boot_region_init() && backup_boot_region_init() && fat1_init() && fat2_init() && clusterHeap_init() && bitMapTable_init() && rootDir_init())
 	{
 		printf("NewGen ExFAT is sucessfully mounted on the partition !\n");
 		return true;
@@ -204,11 +204,6 @@ static bool clusterHeap_init()
 			return false;	
 	}
 
-	if(!rootDir_init())
-		return false;
-
-
-
 	// Debug :: z = ftell(volume);
 	// Debug :: printf("ClusterHeap End: %ld\n", z);
 	return true;
@@ -221,6 +216,8 @@ static bool bitMapTable_init()
 	for (int i = 0; i < 4588; ++i)
 		BitMapTable1.bitMap[i] = 0x00;
 
+	BitMapTable1.bitMap[0] = 15;
+
 	for (int i = 0; i < 4588; ++i)
 		str[i] = BitMapTable1.bitMap[i];
 
@@ -229,6 +226,8 @@ static bool bitMapTable_init()
 
 	for (int i = 0; i < 4588; ++i)
 		BitMapTable2.bitMap[i] = 0x00;
+
+	BitMapTable2.bitMap[0] = 0x0F;
 
 	for (int i = 0; i < 4588; ++i)
 		str[i] = BitMapTable2.bitMap[i];

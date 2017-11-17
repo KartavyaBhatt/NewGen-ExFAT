@@ -111,6 +111,7 @@ void set_cluster_bitmap2(uint32_t clusterNumber)
 	set_bitMapTable2(BitMapTable1);
 }
 
+
 static bool rootDir_init()
 {
 	FILE *volume = get_volume();
@@ -139,7 +140,7 @@ static bool rootDir_init()
 	UpCaseTableDirectoryEntry.dataLength = 128;
 
 	VolumeLabelEntry.EntryType = 0x83;
-	VolumeLabelEntry.volumeLabel[0] = 'N';
+	strcpy(VolumeLabelEntry.volumeLabel, "NewGen ExFAT");
 
 	cti_allocationBMapEntry(AllocationBMapEntry1, arr);
 	for (int i = 0; i < 32; ++i)
