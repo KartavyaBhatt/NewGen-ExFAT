@@ -5,12 +5,13 @@
 // #include "io.c"
 #include "fs_io.c"
 
-void main()
+int main()
 {
 	int choice;
 	uint8_t buff1[CLUSTERSIZE];
 	char data[CLUSTERSIZE];
 	uint32_t clusterNumber;
+	char filename[30];
 	
 	NGEF_init("FS", 7340032);                //Creating partiton of 1GB = 1073741824 bytes
 
@@ -22,7 +23,7 @@ void main()
 		printf("\t\t\t4. Read contents of a file\n");
 		printf("\t\t\t5. Help\n");
 		printf("Enter your operation code : ");
-		scanf("%d", choice);
+		scanf("%d", &choice);
 
 		switch(choice)
 		{
@@ -82,8 +83,19 @@ void main()
 				break;
 
 			case 5:{
-				
+				printf("1. Write to a cluster\n");
+				printf("Write to a particular cluster by passing \ndata string and a 32-bit cluster number.");
+				printf("\n\n2. Read a cluster\n");
+				printf("Read the data stored inside a particular cluster \nby passing string pointer where data will be returned \nand 32-bit cluster number.");
+				printf("\n\n3. Create a file\n");
+				printf("Create a file by passing its name(less than 30 characters) and data.\n");
+				printf("\n\n4. Read contents of a file\n");
+				printf("Read the data stored in a file by passing \nstring pointer where data will be returned \nand filename.\n");
 			}
+			break;
+
+			case 0:
+				return 0;
 		}
 	}
 }

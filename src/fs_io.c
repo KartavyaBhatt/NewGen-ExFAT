@@ -304,6 +304,7 @@ bool create_file(char *fileName, char *data)
 
 	if(write_cluster(buff, 5) && write_cluster(data, freeCluster))
 	{
+		printf("written to cluster : %" PRIu32 "\n", freeCluster);
 		set_cluster_bitmap1(freeCluster);
 		// Debug :: read_cluster(data, 5);
 		// Debug :: FileDirectoryEntry = cts_fileDirectoryEntry(data+counter);
