@@ -7,52 +7,83 @@
 
 void main()
 {
+	int choice;
 	uint8_t buff1[CLUSTERSIZE];
-	uint8_t buff[32];
-	uint8_t str[32];
 	char data[CLUSTERSIZE];
 	uint32_t clusterNumber;
 	
 	NGEF_init("FS", 7340032);                //Creating partiton of 1GB = 1073741824 bytes
 
-	
+	while(1)
+	{
+		printf("\n\n\t\t\t1. Write to a cluster\n");
+		printf("\t\t\t2. Read a cluster\n");
+		printf("\t\t\t3. Create a file\n");
+		printf("\t\t\t4. Read contents of a file\n");
+		printf("\t\t\t5. Help\n");
+		printf("Enter your operation code : ");
+		scanf("%d", choice);
+
+		switch(choice)
+		{
+			case 1:{
+				printf("Enter cluster number to write : ");
+				scanf("%" SCNu32 "", &clusterNumber);
+
+				printf("Enter data : ");
+				scanf("%s", data);
 
 
-	// if(write_cluster(data, 5))
-	// {
-	// 	read_cluster(buff1, 5);
+				if(write_cluster(data, clusterNumber))
+					printf("Written !\n");
+				else
+					printf("Writing to cluster failed !\n");
+			}
+				break;
 
-	// 	if (buff1)
-	// 	{
-	// 		printf("%s\n", buff1);
-	// 	}
-	// }
+			case 2:{
+				printf("Enter cluster number to read : \n");
+				scanf("%" SCNu32 "", &clusterNumber);
 
-	char *path = "/";
-	char filename[30];
-	
-	
-	printf("Enter file name : ");
-	scanf("%s", filename);
-	fflush(stdin);
-	printf("Enter file data : ");
-	scanf("%s", data);
+				
 
-	// uint64_t pl = strlen(path);
-	// uint64_t dl = strlen(data);
+				if(read_cluster(buff1, clusterNumber))
+					printf("%s\n", buff1);
+				else
+					printf("Eror reading cluster %" PRIu32 "\n", clusterNumber);
+			}
+				break;
 
-	// printf("%" PRIu64 "\n", pl);
-	// printf("%" PRIu64 "\n", dl);
-	
-	if(create_file(filename, data))
-	 	printf("Created File in root.\n\n");
+			case 3:{
+				printf("Enter file name : ");
+				scanf("%s", filename);
+				fflush(stdin);
+				printf("Enter file data : ");
+				scanf("%s", data);
+				
+				if(create_file(filename, data))
+				 	printf("Created File %s in root.\n\n", filename);
 
-	fflush(stdin);
+				else
+					printf("Error creating file.\n");
+			}
+				break;
 
-	printf("Enter filename to read : ");
-	// scanf("%s", filename);
-	scanf("%s", filename);
+			case 4:{
+				fflush(stdin);
 
-	read_cluster(buff1, 6);
-	printf("%s", buff1);
+				printf("Enter filename to read : ");
+				// scanf("%s", filename);
+				scanf("%s", filename);
+
+				if(read_file(filename, buff1))
+					printf("\n%s", buff1);
+			}
+				break;
+
+			case 5:{
+				
+			}
+		}
+	}
 }

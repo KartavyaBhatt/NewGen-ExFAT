@@ -253,6 +253,7 @@ bool create_file(char *fileName, char *data)
 	while(counter <= CLUSTERSIZE)
 	{
 		cnt = 0;
+
 		for (int i = 0+counter; i < 32; ++i)
 		str[i] = buff[i];
 
@@ -276,7 +277,10 @@ bool create_file(char *fileName, char *data)
 		counter += 96;
 	}
 
-	counter -= 96;
+	if (counter != 96)
+		counter -= 96;
+	
+	// Debug :: printf("counter : %d\n", counter);
 
 	FileDirectoryEntry.EntryType = 0x85;
 	FileDirectoryEntry.fileAttribute = 0x0010;
@@ -295,9 +299,15 @@ bool create_file(char *fileName, char *data)
 	cti_streamExtensionEntry(StreamExtensionEntry, buff+counter+32);
 	cti_fileNameEntry(FileNameEntry, buff+counter+64);
 
+	// Debug :: FileDirectoryEntry = cts_fileDirectoryEntry(buff+counter);
+	// Debug :: printf("EntryType : %" PRIu8 "\n", FileDirectoryEntry.EntryType);
+
 	if(write_cluster(buff, 5) && write_cluster(data, freeCluster))
 	{
 		set_cluster_bitmap1(freeCluster);
+		// Debug :: read_cluster(data, 5);
+		// Debug :: FileDirectoryEntry = cts_fileDirectoryEntry(data+counter);
+		// Debug :: printf("EntryType : %" PRIu8 "\n", FileDirectoryEntry.EntryType);
 		return true;
 	}
 
@@ -307,7 +317,6 @@ bool create_file(char *fileName, char *data)
 bool read_file(char *fileName, char *str)
 {
 	uint8_t buff[CLUSTERSIZE];
-	// uint8_t str[32];
 	uint8_t null;
 	uint32_t freeCluster, prev;
 	int counter = 0, cnt;
@@ -325,27 +334,23 @@ bool read_file(char *fileName, char *str)
 	while(counter <= CLUSTERSIZE)
 	{
 		cnt = 0;
-		for (int i = 0+counter; i < 32; ++i)
-		str[i] = buff[i];
 
-		FileDirectoryEntry = cts_fileDirectoryEntry(str);
+		FileDirectoryEntry = cts_fileDirectoryEntry(buff+counter);
 
 		if (FileDirectoryEntry.EntryType == 0)
 		{
+			printf("No such file/directory.\n");
 			return false;
 			break;
 		}
 
-		for (int i = 32+counter; i < 64; ++i)
-			str[i-32 - counter] = buff[i];
-
-		StreamExtensionEntry = cts_streamExtensionEntry(str);
+		
+		StreamExtensionEntry = cts_streamExtensionEntry(buff+counter+32);
 		prev = StreamExtensionEntry.firstCluster;
+		// Debug :: printf("firstCluster : %" PRIu32 "\n", StreamExtensionEntry.firstCluster);
 
-		for (int i = 64+counter; i < 96; ++i)
-			str[i-64 - counter] = buff[i];
-
-		FileNameEntry = cts_fileNameEntry(str);
+		
+		FileNameEntry = cts_fileNameEntry(buff+counter+64);
 
 		for (int i = 0; i < 30; ++i)
 		{
