@@ -283,7 +283,7 @@ bool create_file(char *fileName, char *data)
 	// Debug :: printf("counter : %d\n", counter);
 
 	FileDirectoryEntry.EntryType = 0x85;
-	FileDirectoryEntry.fileAttribute = 0x0010;
+	FileDirectoryEntry.fileAttribute = 0x0000;
 
 	StreamExtensionEntry.EntryType = 0xC0;
 	StreamExtensionEntry.generalSecondaryFlags = 0x01;

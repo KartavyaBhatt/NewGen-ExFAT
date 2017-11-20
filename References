@@ -3,6 +3,7 @@ Using TexFAT like copy of FAT table.
 Cluster Allocation in TexFAT is given in this research paper.
 https://www.researchgate.net/publication/291074776_Characterization_of_Transaction-Safe_Cluster_Allocation_Strategies_of_TexFAT_File_System_for_Embedded_Storage_Devices
 
+
 Detailed discription of exFAT.
 https://en.wikipedia.org/wiki/ExFAT
 

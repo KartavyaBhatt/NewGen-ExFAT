@@ -97,7 +97,8 @@ void set_cluster_bitmap1(uint32_t clusterNumber)
 {
 	bitMapTable BitMapTable1 = get_bitmapTable1();
 
-	BitMapTable1.bitMap[(uint8_t) ((clusterNumber-2)/8)] = BitMapTable1.bitMap[(uint8_t) ((clusterNumber-2)/8)] | (1  >> (7-((clusterNumber-2)%8)));
+	// Debug :: printf("Index %" PRIu8 "\n", BitMapTable1.bitMap[(uint8_t) ((clusterNumber-2)/8)] | (1  >> (7-((clusterNumber-2)%8))));
+	BitMapTable1.bitMap[(uint8_t) ((clusterNumber-2)/8)] = BitMapTable1.bitMap[(uint8_t) ((clusterNumber-2)/8)] | (128  >> (7-((clusterNumber-2)%8)));
 
 	set_bitMapTable1(BitMapTable1);
 }
